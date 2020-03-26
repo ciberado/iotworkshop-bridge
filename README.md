@@ -17,8 +17,8 @@ Enjoy!
 * Choose a nice prefix to identify your resources
 
 ```bash
-PREFIX=workshop
-RESOURCE_GROUP_NAME=$PREFIX-rg
+PREFIX=workshop && echo $PREFIX
+RESOURCE_GROUP_NAME=$PREFIX-rg && echo $RESOURCE_GROUP_NAME
 IOT_HUB_NAME=$PREFIX-iothub
 ```
 
@@ -28,6 +28,25 @@ IOT_HUB_NAME=$PREFIX-iothub
 EDGE_DEVICE_NAME=$USER-edge-$RANDOM
 
 echo Your edge device name will $EDGE_DEVICE_NAME.
+```
+
+* Save those variables for easier retrieve
+
+```bash
+cat << EOF > variables
+export PREFIX=$PREFIX
+export RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME
+export IOT_HUB_NAME=$IOT_HUB_NAME
+export EDGE_DEVICE_NAME=$EDGE_DEVICE_NAME
+EOF
+
+cat variables
+```
+
+* If you need to reload the variables, use
+
+```bash
+source variables
 ```
 
 * Install the *iot* extension to the *az* command so you can manipulate the *IoTHub*
@@ -185,11 +204,13 @@ exit
 
 ## Deploying modules to the device
 
-* Doublecheck you are again using the terminal of your workstation (not the device vm). 
+* Doublecheck you are again using the terminal of your workstation (not the device vm, **you should not see *iot* as user in the prompt**)
 
-* Check it again.
+* Check it again. Really
 
-* Now deploy the modules on the device (actually, tell the *iothub* to ask the device to update its status) and open the port 3000 to access the webapp created by the deployment
+* Take a few minutes to check the [workshop/deployment.json](workshop/deployment.json) as it contains the configuration for the *edge device*
+
+* Now deploy the modules on the device (actually, tell the *iothub* to ask the device to update its status)
 
 ```bash
 wget https://raw.githubusercontent.com/ciberado/iotworkshop-bridge/master/workshop/deployment.json
@@ -197,13 +218,26 @@ az iot edge set-modules \
   --hub-name $IOT_HUB_NAME \
   --device-id $EDGE_DEVICE_NAME \
   --content deployment.json
+```
 
-az vm open-port --resource-group $RESOURCE_GROUP_NAME --name vm$EDGE_DEVICE_NAME --port 3000  
+* Open the port 3000 to access the *http-to-iothub* application created by the deployment
+
+```bash
+az vm open-port \
+  --resource-group $RESOURCE_GROUP_NAME \
+  --name vm$EDGE_DEVICE_NAME \
+  --port 3000  
+```
+
+* Check you can access the bridge (it will return a `404`, but that is fine)
+
+```bash
+curl -X HEAD -I http://$IP:3000
 ```
 
 ## Watching IoTHub events
 
-* Using a [tmux](https://github.com/tmux/tmux/wiki) panel or a new terminal session, start monitoring IotHub messages:
+* Start monitoring IotHub messages:
 
 ```bash
 IOTHUB_CONN_STRING=$(az iot hub show-connection-string \
@@ -217,15 +251,18 @@ az iot hub monitor-events --login $IOTHUB_CONN_STRING -y
 
 ## Generating events
 
+* If you are using [tmux](https://github.com/tmux/tmux/wiki), press `ctrl+b` `"` to create a new panel. Otherway, open a new terminal session (to keep running the event monitoring in the previous one)
+
 * Create a program that emulates the sensors that provide information to the edge location device
 
 ```
-cat << EOF > sensor-simulator.sh
+cat << 'EOF' > sensor-simulator
 #!/bin/bash
 
 if [ "$#" -ne 2 ]; then
   echo "Please, provide the sensor name as parameter, followed by the gateway endpoint."
   echo "Example: sensor-simulator.sh demo-sensor-1 http://32.12.40.8:3000"
+  exit
 fi
 
 SENSOR_NAME=$1
@@ -238,10 +275,18 @@ do
   SENSOR_LECTURE=$(shuf -i 50-200 -n 1)
   curl -X POST $ENDPOINT --header "Content-type: application/json" \
        --data "{\"sensor\": \"$SENSOR_NAME\", \"value\":$SENSOR_LECTURE}"
-  echo "Sensor lecture sent: $SENSOR_LECTURE"
+  echo " Sensor $SENSOR_NAME, lecture $SENSOR_LECTURE."
   sleep 1
 done
 EOF
+
+chmod +x sensor-simulator
+```
+
+* Load the env variables
+
+```bash
+source variables
 ```
 
 * Run one or more simulated sensors
@@ -255,7 +300,7 @@ IP=$(az vm show \
   --output tsv) \
 && echo $IP
 
-bash sensor-simulator.sh http://$IP:3000 $EDGE_DEVICE_NAME-sensor-$RANDOM
+./sensor-simulator $EDGE_DEVICE_NAME-sensor-$RANDOM http://$IP:3000 
 
 ```
 
