@@ -19,7 +19,7 @@ Enjoy!
 ```bash
 PREFIX=workshop
 RESOURCE_GROUP_NAME=$PREFIX-rg
-IOT_HUB_NAME=$PREFIX-hub
+IOT_HUB_NAME=$PREFIX-iothub
 ```
 
 * Set your very own unique name for your *edge device*
@@ -145,7 +145,25 @@ cat *.txt
 
 ```
 tail /var/log/cloud-init.log
+```
+
+* Docker agent is installed, but only root can access it for now:
+
+```bash
 docker ps
+```
+
+* Provide access to docker for non-root user in a very hacky way
+
+```bash
+sudo usermod -aG docker $(whoami)
+oldg=$(id -g) && newgrp docker && newgrp $oldg
+docker ps
+```
+
+* Check we have de `iotedgectl` cli
+
+```bash
 iotedgectl --version
 ```
 
@@ -156,7 +174,7 @@ DEVICE_CONN_STRING=$(cat *.txt) && echo $DEVICE_CONN_STRING
 sudo iotedgectl setup --connection-string $DEVICE_CONN_STRING --nopass
 ```
 
-* Start the device! (and see how the `dockerAgent` is already being deployed)
+* Start the device! (and see how the `edgeAgent` is already being deployed)
 
 ```bash
 sudo iotedgectl start
