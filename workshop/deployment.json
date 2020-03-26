@@ -37,7 +37,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "ciberado/httpproxymodule:0.0.1-amd64",
+              "image": "ciberado/httpproxymodule:0.0.1",
               "createOptions": "{\"ExposedPorts\":{\"3000/tcp\":{}},\"HostConfig\":{\"PortBindings\":{\"3000/tcp\":[{\"HostPort\":\"3000\"}]}}}"
             }
           }
