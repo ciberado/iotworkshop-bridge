@@ -17,17 +17,17 @@ Enjoy!
 * Choose a nice prefix to identify your resources
 
 ```bash
-PREFIX=$USER
-```
-
-* Set some variables with their names
-
-```bash
+PREFIX=workshop
 RESOURCE_GROUP_NAME=$PREFIX-rg
 IOT_HUB_NAME=$PREFIX-hub
-DEVICE_NAME=$PREFIX-device-$RANDOM
+```
 
-echo Your edge device name will $DEVICE_NAME.
+* Set your very own unique name for your *edge device*
+
+```bash
+EDGE_DEVICE_NAME=$PREFIX-edge-$RANDOM
+
+echo Your edge device name will $EDGE_DEVICE_NAME.
 ```
 
 * If you are not using *cloudshell* you need to login in Azure by opening the [device login page](https://aka.ms/devicelogin), typing  your credentials and the code provided by:
@@ -65,7 +65,7 @@ az iot hub list \
 ```bash
 az iot hub device-identity create \
   --hub-name $IOT_HUB_NAME \
-  --device-id $DEVICE_NAME \
+  --device-id $EDGE_DEVICE_NAME \
   --edge-enabled
 
 az iot hub device-identity list \
@@ -73,11 +73,11 @@ az iot hub device-identity list \
   --query '[].{id: deviceId, state: connectionState}'
 
 DEVICE_CONN_STRING=$(az iot hub device-identity show-connection-string \
-  --device-id $DEVICE_NAME \
+  --device-id $EDGE_DEVICE_NAME \
   --hub-name $IOT_HUB_NAME \
   --query connectionString --output tsv) \
-&& echo $DEVICE_CONN_STRING > $DEVICE_NAME.txt \
-&& cat $DEVICE_NAME.txt
+&& echo $DEVICE_CONN_STRING > $EDGE_DEVICE_NAME.txt \
+&& cat $EDGE_DEVICE_NAME.txt
 ```
 
 * We are going to create an Edge gateway using a vm instead of a baremetal server like a Raspberry PI, in order to make this workshop more straightforward. To provision the gateway software, write the init script to a file:
@@ -100,7 +100,7 @@ EOF
 
 ```bash
 az vm create \
-  --name vm$DEVICE_NAME \
+  --name vm$EDGE_DEVICE_NAME \
   --resource-group $RESOURCE_GROUP_NAME \
   --admin-password Iot123456789 \
   --admin-username iot \
@@ -109,7 +109,7 @@ az vm create \
   --location westeurope \
   --nsg-rule ssh \
   --public-ip-address-allocation dynamic \
-  --vnet-name vnet$DEVICE_NAME
+  --vnet-name vnet$EDGE_DEVICE_NAME
 ```
 
 * The last step is going to take some time so, why don't you take a look at the [cloud-init script](initvm.sh) in the meanwhile? **You can use the exactly same script to provision the IoT Edge Runtime in your Raspberry PI  :)**
@@ -122,7 +122,7 @@ az vm create \
 IP=$(az vm show \
   --show-details \
   --resource-group $RESOURCE_GROUP_NAME \
-  --name vm$DEVICE_NAME \
+  --name vm$EDGE_DEVICE_NAME \
   --query publicIps \
   --output tsv) \
 && echo $IP
@@ -173,10 +173,10 @@ exit
 wget https://raw.githubusercontent.com/ciberado/iotworkshop-bridge/master/workshop/deployment.json
 az iot edge set-modules \
   --hub-name $IOT_HUB_NAME \
-  --device-id $DEVICE_NAME \
+  --device-id $EDGE_DEVICE_NAME \
   --content deployment.json
 
-az vm open-port --resource-group $RESOURCE_GROUP_NAME --name vm$DEVICE_NAME --port 3000  
+az vm open-port --resource-group $RESOURCE_GROUP_NAME --name vm$EDGE_DEVICE_NAME --port 3000  
 ```
 
 ## Watching IoTHub events
@@ -228,12 +228,12 @@ EOF
 IP=$(az vm show \
   --show-details \
   --resource-group $RESOURCE_GROUP_NAME \
-  --name vm$DEVICE_NAME \
+  --name vm$EDGE_DEVICE_NAME \
   --query publicIps \
   --output tsv) \
 && echo $IP
 
-bash sensor-simulator.sh http://$IP:3000 $DEVICE_NAME-sensor-$RANDOM
+bash sensor-simulator.sh http://$IP:3000 $EDGE_DEVICE_NAME-sensor-$RANDOM
 
 ```
 
