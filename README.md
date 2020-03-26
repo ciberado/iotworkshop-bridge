@@ -25,9 +25,15 @@ IOT_HUB_NAME=$PREFIX-hub
 * Set your very own unique name for your *edge device*
 
 ```bash
-EDGE_DEVICE_NAME=$PREFIX-edge-$RANDOM
+EDGE_DEVICE_NAME=$USER-edge-$RANDOM
 
 echo Your edge device name will $EDGE_DEVICE_NAME.
+```
+
+* Install the *iot* extension to the *az* command so you can manipulate the *IoTHub*
+
+```bash
+az extension add --name azure-cli-iot-ext
 ```
 
 * If you are not using *cloudshell* you need to login in Azure by opening the [device login page](https://aka.ms/devicelogin), typing  your credentials and the code provided by:
@@ -47,8 +53,6 @@ az group create --name $RESOURCE_GROUP_NAME --location westeurope
 * Create the iot hub
 
 ```bash
-az extension add \
-  --name azure-cli-iot-ext
 az iot hub create \
   --resource-group $RESOURCE_GROUP_NAME \
   --name $IOT_HUB_NAME --sku S1
