@@ -14,15 +14,20 @@ Enjoy!
 
 * Open the cloudshell
 
-* Choose some nice names for your deployment
+* Choose a nice prefix to identify your resources
 
 ```bash
 PREFIX=$USER
+```
+
+* Set some variables with their names
+
+```bash
 RESOURCE_GROUP_NAME=$PREFIX-rg
 IOT_HUB_NAME=$PREFIX-hub
 DEVICE_NAME=$PREFIX-device-$RANDOM
 
-echo Your device name is $DEVICE_NAME.
+echo Your edge device name will $DEVICE_NAME.
 ```
 
 * If you are not using *cloudshell* you need to login in Azure by opening the [device login page](https://aka.ms/devicelogin), typing  your credentials and the code provided by:
@@ -240,4 +245,7 @@ bash sensor-simulator.sh http://$IP:3000 $DEVICE_NAME-sensor-$RANDOM
 az group delete --name $RESOURCE_GROUP_NAME
 ```
 
+## Additional links and resources
 
+* IoTHub events can be easily processed in ETLs by using [Stream Analytics Jobs](https://azure.microsoft.com/services/stream-analytics/)
+* This tutorial explains [how to visualize IoTHub events with PowerBI](https://docs.microsoft.com/es-es/azure/iot-hub/iot-hub-live-data-visualization-in-power-bi)
