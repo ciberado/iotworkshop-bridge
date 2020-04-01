@@ -4,6 +4,10 @@
 
 #define Vib A0
 
+#define EDGE_DEVICE_ENDPOINT  "http://52.136.215.36:3000/"
+#define WIFI_SSID  "startrek"
+#define WIFI_PASS  "11111111"
+
 WiFiClient wifiClient;
 int val;
 HTTPClient http;
@@ -13,7 +17,7 @@ void setup() {
   delay(10);
 
   Serial.print("Connecting to the wifi");
-  WiFi.begin("startrek", "11111111");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
   WiFi.setSleepMode(WIFI_NONE_SLEEP);
   WiFi.setAutoReconnect (true);
   while (WiFi.status() != WL_CONNECTED)
@@ -35,7 +39,7 @@ void loop() {
 
     if (WiFi.status() == WL_CONNECTED) {
       Serial.print("Sending http post. ");
-      http.begin("http://52.136.215.36:3000/");
+      http.begin(EDGE_DEVICE_ENDPOINT);
       http.addHeader("Content-Type", "application/json");
       String message = "";
       message += "{\"sensor\" : \"esp8266\", \"value\": ";
