@@ -7,11 +7,13 @@
 
 ![Node MCU photo](nodemcu-v3-esp8266.jpg)
 
+### Pin diagram
+
 ![Node MCU diagram](nodemcu-v3-esp8266-diagram.jpg)
 
 ### Piezo electric sensor
 
-![Piezo electric sensor](piezo-electric-sensor.jpg)
+![Piezo electric sensor](piezoelectric.jpg)
 
 ## The circuit
 
