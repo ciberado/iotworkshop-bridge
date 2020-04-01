@@ -4,7 +4,7 @@ This is the **short** version of the workshop, simplified to be delivered in an 
 
 ## Architecture
 
-![Architecture diagram](architecture.png)
+![Architecture diagram](../architecture.png)
 
 ## Environment preparation
 
@@ -255,7 +255,7 @@ IP=$(az vm show \
   --name vm$EDGE_DEVICE_NAME \
   --query publicIps \
   --output tsv) \
-&& echo $IP
+&& echo Your Edge device has the IP $IP
 ```
 
 * Run one or more simulated sensors
