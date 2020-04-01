@@ -8,6 +8,10 @@ I think the tutorial is a nice and quick way to understand how Azure Iot Edge wo
 
 Enjoy!
 
+## Architecture
+
+![Architecture diagram](architecture.png)
+
 ## Environment preparation
 
 * Login into the [Azure portal](https://portal.azure.com)
