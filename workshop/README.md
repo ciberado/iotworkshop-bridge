@@ -66,10 +66,10 @@ DEVICE_CONN_STRING=$(az iot hub device-identity show-connection-string \
 && cat $EDGE_DEVICE_NAME.txt
 ```
 
+## IotEdge runtime configuration
+
 * You will need a VM (or a raspberry) with `docker`, `python` and [iotedgectl](https://pypi.org/project/azure-iot-edge-runtime-ctl/) to run the *Edge Runtime*. With a bit of luck, we have already created it for you. If this is not the case, look the the [extra section](#how-to-provision-your-edge-device) at the end of this document.
 
-
-## IotEdge runtime configuration
 
 * Get the IP of your Edge Device with
 
