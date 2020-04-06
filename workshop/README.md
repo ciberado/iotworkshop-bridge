@@ -274,6 +274,8 @@ az vm create \
   --vnet-name vnet$EDGE_DEVICE_NAME
 ```
 
+* Once the command `az vm create` has returned, wait and additional minute or so in order to provide enough time to finish the tool provisioning. Go and get some coffee. Read the news. Relax.
+
 * Later, you will need access to port 3000 of the VM. So lets open it now
 
 ```bash
@@ -283,4 +285,3 @@ az vm open-port \
   --port 3000  
 ```
 
-* Once the command `az vm create` has returned, wait and additional minute or so in order to provide enough time to finish the tool provisioning. Go and get some coffee. Read the news. Relax.
