@@ -20,7 +20,7 @@ az extension add --name azure-cli-iot-ext
 az login
 ```
 
-* Set the a few variables
+* Set a few variables to make the commands more readable
 
 ```bash
 RESOURCE_GROUP_NAME=workshop-rg
@@ -32,7 +32,7 @@ echo Your edge device name will be $EDGE_DEVICE_NAME
 
 ## Checking the IoTHub
 
-* Check the existance of the IoTHub
+* Check the existence of the IoTHub
 
 ```bash
 az iot hub list \
@@ -66,42 +66,12 @@ DEVICE_CONN_STRING=$(az iot hub device-identity show-connection-string \
 && cat $EDGE_DEVICE_NAME.txt
 ```
 
-* We are going to create an Edge gateway using a vm instead of a baremetal server like a Raspberry PI, in order to make this workshop more straightforward. To provision the gateway software, write the init script to a file:
-
-```bash
-cat << EOF > initvm.sh
-#!/bin/sh
-
-sudo apt update
-sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
-curl -sSL https://get.docker.com | sh
-sudo apt install python-pip -y
-sudo pip install azure-iot-edge-runtime-ctl
-sudo apt-get remove unscd -y
-sudo usermod -aG docker iot
-EOF
-```
-
-* Create the vm that we are going to use as device
-
-```bash
-az vm create \
-  --name vm$EDGE_DEVICE_NAME \
-  --resource-group $RESOURCE_GROUP_NAME \
-  --admin-password Iot123456789 \
-  --admin-username iot \
-  --custom-data initvm.sh \
-  --image Canonical:UbuntuServer:16.04-LTS:latest \
-  --location westeurope \
-  --nsg-rule ssh \
-  --public-ip-address-allocation dynamic \
-  --vnet-name vnet$EDGE_DEVICE_NAME
-```
+* You will need a VM (or a raspberry) with `docker`, `python` and [iotedgectl](https://pypi.org/project/azure-iot-edge-runtime-ctl/) to run the *Edge Runtime*. With a bit of luck, we have already created it for you. If this is not the case, look the the [extra section](#how-to-provision-your-edge-device) at the end of this document.
 
 
 ## IotEdge runtime configuration
 
-* Once the command `az vm create` has returned, wait and additional minute or so in order to provide enough time to finish the tool provisioning. Go and get some coffee. Read the news. After that, connect to your new device vm with 
+* Get the IP of your Edge Device with
 
 ```
 IP=$(az vm show \
@@ -177,15 +147,6 @@ az iot edge set-modules \
   --hub-name $IOT_HUB_NAME \
   --device-id $EDGE_DEVICE_NAME \
   --content deployment.json
-```
-
-* Open the port 3000 to access the *http-to-iothub* application created by the deployment
-
-```bash
-az vm open-port \
-  --resource-group $RESOURCE_GROUP_NAME \
-  --name vm$EDGE_DEVICE_NAME \
-  --port 3000  
 ```
 
 * Check you can access the bridge (it will return a `404`, but that is fine)
@@ -278,3 +239,48 @@ az group delete --name $RESOURCE_GROUP_NAME
 
 * IoTHub events can be easily processed in ETLs by using [Stream Analytics Jobs](https://azure.microsoft.com/services/stream-analytics/)
 * This tutorial explains [how to visualize IoTHub events with PowerBI](https://docs.microsoft.com/es-es/azure/iot-hub/iot-hub-live-data-visualization-in-power-bi)
+
+## How to provision your Edge Device
+
+* To provision the gateway software, write the init script to a file:
+
+```bash
+cat << EOF > initvm.sh
+#!/bin/sh
+
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+curl -sSL https://get.docker.com | sh
+sudo apt install python-pip -y
+sudo pip install azure-iot-edge-runtime-ctl
+sudo apt-get remove unscd -y
+sudo usermod -aG docker iot
+EOF
+```
+
+* Create the vm that we are going to use as device
+
+```bash
+az vm create \
+  --name vm$EDGE_DEVICE_NAME \
+  --resource-group $RESOURCE_GROUP_NAME \
+  --admin-password Iot123456789 \
+  --admin-username iot \
+  --custom-data initvm.sh \
+  --image Canonical:UbuntuServer:16.04-LTS:latest \
+  --location westeurope \
+  --nsg-rule ssh \
+  --public-ip-address-allocation dynamic \
+  --vnet-name vnet$EDGE_DEVICE_NAME
+```
+
+* Later, you will need access to port 3000 of the VM. So lets open it now
+
+```bash
+az vm open-port \
+  --resource-group $RESOURCE_GROUP_NAME \
+  --name vm$EDGE_DEVICE_NAME \
+  --port 3000  
+```
+
+* Once the command `az vm create` has returned, wait and additional minute or so in order to provide enough time to finish the tool provisioning. Go and get some coffee. Read the news. Relax.
